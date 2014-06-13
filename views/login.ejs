@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p><%= message %></p>
+    <div>
+	<% if (auth) { %>
+		<p><a href="/get">Get URL!</p>
+	<% } else { %>
+		<form action="/auth" method="post">
+			<input placeholder="Username" type="text" name="user"><br>
+			<input placeholder="Password" type="password" name="password"><br>
+			<input type="submit">
+		</form>
+	<% } %>
+	</div>
+  </body>
+</html>
