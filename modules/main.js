@@ -1,90 +1,86 @@
 var config = require('./config.js'),
     Promise = require("es6-promise").Promise,
-    pg = require('pg.js');
+    pg = require('pg.js'),
+    Module;
 
-var Module = function () {
+Module = function () {
+
+    'use strict';
+
     var that = this,
         db_user = 'postgres', // to config
         db_pass = '111',
         db_name = 'postgres',
         db_host = 'localhost',
-        conString = 'postgres://'+db_user+':'+db_pass+'@'+db_host+'/'+db_name+'',
-        checkAuth = function (req) {
-            if(req && req.session) {
-                if (typeof(req.session.is_authorized) != 'undefined') {
-                    return true;
-                }
+        conString = 'postgres://' + db_user + ':' + db_pass + '@' + db_host + '/' + db_name,
+        checkAuth;
+
+    checkAuth = function (req) {
+        if (req && req.session) {
+            if (req.session.is_authorized !== undefined) {
+                return true;
             }
-            return false;
-        };
-    
+        }
+        return false;
+    };
     this.process = function () {};
     this.name = '';
-    this.username;
     this.init = function (request, response) {
         var accept = request.get('Accept') || '';
         that.req = request;
         that.res = response;
         that.acceptsJSON = (accept.indexOf('application/json') !== -1 || accept.indexOf('text/javascript') !== -1);
         that.acceptsHTML = (accept.indexOf('text/html') !== -1);
-        
-        if (checkAuth (request) === false && that.name !== 'auth') {
+
+        if (checkAuth(request) === false && that.name !== 'auth') {
             if (that.acceptsJSON) {
                 response.json({
-                    'status':'0',
-                    'message':'Please log in.',                    
+                    'status': '0',
+                    'message': 'Please log in.',
                     'formURL': config.formURL,
                     'formId': config.formId
                 });
-            }
-            else {
+            } else {
                 if (that.acceptsHTML) {
                     response.redirect('/login');
-                }
-                else {
-                    response.send( 'Unauthorized', 401 );
+                } else {
+                    response.send('Unauthorized', 401);
                 }
             }
-        }
-        else {
+        } else {
             that.process();
         }
     };
-    
+
     this.toDB = function (query) {
-        return new Promise(function(resolve, reject) {  
-            if (typeof(query) !== 'string') {
+        return new Promise(function (resolve, reject) {
+            if (typeof query !== 'string') {
                 reject('Wrong query');
-            }
-            else {
+            } else {
                 var client = new pg.Client(conString),
 					error_text;
-					
-                client.connect(function(err) {
-                    if(err) {
+
+                client.connect(function (err) {
+                    if (err) {
                         reject('could not connect to DB', err);
-                    }
-                    else {
-                        client.query(query, function(err, result) {
-                            if(err) {
+                    } else {
+                        client.query(query, function (err, result) {
+                            if (err) {
                                 reject('error running query', err);
 								return false;
                             }
-                            
-							if (typeof (result) !== 'undefined') {
-                                if(!result.rows) {
+
+							if (result !== undefined) {
+                                if (!result.rows) {
                                     error_text = 'no rows, that`s strange...';
-                                }
-                                else {
-                                    if (typeof (result.rows.length) !== 'undefined' && result.rows.length < 1) {
+                                } else {
+                                    if (result.rows.length !== undefined && result.rows.length < 1) {
                                         error_text = 'no results';
-                                    }
-                                    else {
+                                    } else {
                                         resolve(result.rows);
-                                    }                                    
+                                    }
                                 }
-                            }
-							else {
+                            } else {
 								error_text = 'cannot retrieve a result';
 							}
                             if (error_text) {
@@ -96,7 +92,7 @@ var Module = function () {
                 });
             }
         });
-    }
-}
+    };
+};
 
 module.exports = Module;
