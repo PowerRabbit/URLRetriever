@@ -58,7 +58,7 @@ Module = function () {
                 reject('Wrong query');
             } else {
                 var client = new pg.Client(conString),
-					error_text;
+                    error_text;
 
                 client.connect(function (err) {
                     if (err) {
@@ -67,10 +67,10 @@ Module = function () {
                         client.query(query, function (err, result) {
                             if (err) {
                                 reject('error running query', err);
-								return false;
+                                return false;
                             }
 
-							if (result !== undefined) {
+                            if (result !== undefined) {
                                 if (!result.rows) {
                                     error_text = 'no rows, that`s strange...';
                                 } else {
@@ -81,12 +81,12 @@ Module = function () {
                                     }
                                 }
                             } else {
-								error_text = 'cannot retrieve a result';
-							}
+                                error_text = 'cannot retrieve a result';
+                            }
                             if (error_text) {
-								reject(error_text);
-							}
-							client.end();
+                                reject(error_text);
+                            }
+                            client.end();
                         });
                     }
                 });
